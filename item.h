@@ -17,13 +17,18 @@ typedef struct Node {
     int x;
     int y;
     Ed* edges;
-
+    int color;
+    int d;
 } Node;
 typedef struct Graph {
     int size_node;
     int size_ed;
     Node** node;
 } Graph;
+typedef struct Find {
+    Node* node;
+    int d;
+}Find;
 void show(Graph* graph);
 Ed* find_edge( Node *from,Node *to);
 int add_node(Graph** graph, int x, int y, int name);
@@ -34,4 +39,7 @@ Node *find_x_y_name(Graph *graph, int x, int y, int name) ;
 Node *find_name(Graph *graph, int name);
 Node *find_x_y(Graph *graph, int x, int y);
 void delete_all(Graph **Graph);
+int work_with_file(Graph **graph, FILE *file);
+void save_to_file(Graph** graph, FILE* file);
+int width_find(Graph**, int,int);
 #endif //PROGA5_ITEM_H

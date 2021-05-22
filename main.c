@@ -18,7 +18,8 @@ int main() {
     graph->size_ed=0;
     graph->size_node=0;
     printf("Do you want to work with file? (y/n)");
-    char *answer = Get_Str();
+    char *answer;
+    answer= Get_Str();
     if (answer==NULL){
         printf("Something goes wrong restart\n");
         return 0;
@@ -45,8 +46,29 @@ int main() {
         }
         rc = dialog(msgs, NMgsgs);
     }
+
+    printf("Do you want to save to file? (y/n)");
+    answer = Get_Str();
+    if (answer==NULL){
+        printf("Something goes wrong restart\n");
+        return 0;
+    }
+    k1 = strcmp("y", answer);
+    k2 = strcmp("n", answer);
+    while ((k1 != 0) && (k2 != 0)) {
+        printf("Try one more time\n");
+        answer=Get_Str();
+        if (answer==NULL){
+            printf("something goes wrong restart\n");
+            return 0;
+        }
+        k2 = strcmp("n", answer);
+        k1 = strcmp("y", answer);
+    }
+    if (k1 == 0) {
+        D_Save_File(&graph);
+    }
     free(answer);
-    D_Save_File(&graph);
     D_Delete_ALL(&graph);
     free(graph);
     return 0;

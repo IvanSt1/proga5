@@ -12,12 +12,12 @@ int add_node(Graph **graph, int x, int y, int name) {
     } else {
         int n = (*graph)->size_node;
         if ((*graph)->node == NULL) {
-            (*graph)->node = (Node **) calloc(sizeof(Node **), 1);
+            (*graph)->node = (Node **) calloc( 1,sizeof (Node*));
             n = 0;
         } else {
             (*graph)->node = (Node **) realloc((*graph)->node, (n + 1) * sizeof(Node *));
         }
-        Node *new = (Node *) calloc(sizeof(Node), 1);
+        Node *new = (Node *) calloc(1,sizeof(Node));
         new->x = x;
         new->y = y;
         new->name = name;
@@ -47,12 +47,11 @@ int add_edge(Graph **graph, int from, int to, int weight) {
                 edge->weight = weight;
                 edge->from = f;
                 edge->to = t;
-                edge->next=NULL;
-                edge->previous=NULL;
-                if(f->edges==NULL){
-                    f->edges=edge;
-                }
-                else {
+                edge->next = NULL;
+                edge->previous = NULL;
+                if (f->edges == NULL) {
+                    f->edges = edge;
+                } else {
                     f->edges->previous = edge;
                     edge->next = f->edges;
                     f->edges = edge;
@@ -81,25 +80,24 @@ Ed *find_edge(Node *from, Node *to) {
 }
 
 int delete_node(Graph **graph, int name) {
-    int res, i,k;
-    Ed * e;
+    int res, i, k;
+    Ed *e;
     Node *ptr = find_name(*graph, name);
     if (ptr == NULL) {
         res = 4;
     } else {
-        for(i=0; i<(*graph)->size_node;i++){
-            if((*graph)->node[i]==ptr){
-                k=i;
+        for (i = 0; i < (*graph)->size_node; i++) {
+            if ((*graph)->node[i] == ptr) {
+                k = i;
                 e = (*graph)->node[i]->edges;
                 while (e != NULL) {
                     delete_edge(graph, e->from->name, e->to->name);
                     e = e->next;
                 }
-            }
-            else {
+            } else {
                 e = (*graph)->node[i]->edges;
                 while (e != NULL) {
-                    if(e->to==ptr) {
+                    if (e->to == ptr) {
                         delete_edge(graph, e->from->name, e->to->name);
                     }
                     e = e->next;
@@ -107,8 +105,8 @@ int delete_node(Graph **graph, int name) {
             }
         }
 
-        (*graph)->node[k]=(*graph)->node[(*graph)->size_node-1];
-        (*graph)->node=(Node**) realloc((*graph)->node,(*graph)->size_node-1);
+        (*graph)->node[k] = (*graph)->node[(*graph)->size_node - 1];
+        (*graph)->node = (Node **) realloc((*graph)->node, ((*graph)->size_node - 1) * sizeof(Node *));
         (*graph)->size_node--;
         free(ptr);
         res = 0;
@@ -123,20 +121,20 @@ int delete_edge(Graph **graph, int name_from, int name_to) {
     if (f == NULL || t == NULL || f == t) {
         res = 6;
     } else {
-        Ed* e=find_edge(f, t);
-        if ( e== NULL) {
+        Ed *e = find_edge(f, t);
+        if (e == NULL) {
             res = 6;
         } else {
-            if(e->previous!=NULL) {
+            if (e->previous != NULL) {
                 e->previous->next = e->next;
             }
-            if(e->next!=NULL){
-            e->next->previous=e->previous;
-                }
-            if(e->next==NULL&&e->previous==NULL){
-                f->edges=NULL;
+            if (e->next != NULL) {
+                e->next->previous = e->previous;
             }
-            free (e);
+            if (e->next == NULL && e->previous == NULL) {
+                f->edges = NULL;
+            }
+            free(e);
             res = 0;
             (*graph)->size_ed--;
         }
@@ -192,43 +190,102 @@ void show(Graph *graph) {
 
 }
 
-int work_with_file(Node *graph, FILE *file) {
-    int res;
-    int num1;
-    int num2;
-    char *key;
-    char *string;
-    int n;
-    while (feof(file) == 0) {
-        n = fscanf(file, " %m[^\n]", &key);
-        if (n == -1) {
-            break;
-        }
-        fgetc(file);
-        n = fscanf(file, " %d", &num1);
-        if (n == 0) {
-            res = 1;
-            break;
-        }
-        fgetc(file);
-        n = fscanf(file, " %d", &num2);
-        if (n == 0) {
-            res = 1;
-            break;
-        }
-        fgetc(file);
-        fscanf(file, " %m[^\n]", &string);
-        fgetc(file);
-
+int work_with_file(Graph **graph, FILE *file) {
+    int res, i, k, n_n, n_e, name, x, y, f, t, weight;
+    fread(&n_n, sizeof(int), 1, file);
+    fread(&n_e, sizeof(int), 1, file);
+    for (i = 0; i < n_n; i++) {
+        fread(&name, sizeof(int), 1, file);
+        fread(&x, sizeof(int), 1, file);
+        fread(&y, sizeof(int), 1, file);
+        res = add_node(graph, x, y, name);
         if (res != 0) {
-            break;
+            delete_all(graph);
+            return 1;
+        }
+    }
+    for (i = 0; i < n_e; i++) {
+        fread(&f, sizeof(int), 1, file);
+        fread(&t, sizeof(int), 1, file);
+        fread(&weight, sizeof(int), 1, file);
+        res = add_edge(graph, f, t, weight);
+        if (res != 0) {
+            delete_all(graph);
+            return 1;
+        }
+    }
+    res = 0;
+    return res;
+}
+
+void delete_all(Graph **graph) {
+    for (int i = (*graph)->size_node - 1; i >= 0; i--) {
+        delete_node(graph, (*graph)->node[i]->name);
+    }
+}
+
+void save_to_file(Graph **graph, FILE *file) {
+    Ed *ed;
+    fwrite(&(*graph)->size_node, sizeof(int), 1, file);
+    fwrite(&(*graph)->size_ed, sizeof(int), 1, file);
+    for (int i = 0; i < (*graph)->size_node; i++) {
+        fwrite(&(*graph)->node[i]->name, sizeof(int), 1, file);
+        fwrite(&(*graph)->node[i]->x, sizeof(int), 1, file);
+        fwrite(&(*graph)->node[i]->y, sizeof(int), 1, file);
+    }
+    for (int i = 0; i < (*graph)->size_node; i++) {
+        ed = (*graph)->node[i]->edges;
+        while (ed != NULL) {
+            fwrite(&ed->from->name, sizeof(int), 1, file);
+            fwrite(&ed->to->name, sizeof(int), 1, file);
+            fwrite(&ed->weight, sizeof(int), 1, file);
+            ed = ed->next;
+        }
+    }
+}
+ int width_find(Graph** graph, int from,int to){
+    int res=7,size;
+    Node *f= find_name(*graph,from);
+    Node *t= find_name(*graph,to);
+    if(f==NULL || t==NULL||f==t){
+    }
+    else{
+        for(int i=0;i<(*graph)->size_node;i++){
+            (*graph)->node[i]->color=0;
+            (*graph)->node[i]->d=-1;
+        }
+        f->color++;
+        Find *Q=(Find*) calloc(1,sizeof (Find));
+        Q[0].node=f;
+        size=1;
+        f->d=0;
+        Q[0].d=0;
+        while (Q!=NULL){
+            Ed* e=Q[0].node->edges;
+            if(Q[0].node==t){
+                res=0;
+            }
+            while(e!=NULL) {
+                e->to->color++;
+                if(e->to->color<2) {
+                    Q=(Find*) realloc(Q,(size+1)* sizeof(Find));
+                    Q[size].node=e->to;
+                    size++;
+                    Q[size].d=Q[size-1].d+1;
+                    e->to->d=Q[size-1].d+1;
+                }
+                e=e->next;
+            }
+            for(int i=0;i<size-1;i++){
+                Q[i]=Q[i+1];
+            }
+            Q=(Find*) realloc(Q,(size-1)*sizeof (Find));
+            size--;
+        }
+        for(int i=0;i<(*graph)->size_node;i++){
+            printf("Name: %d, distant: %d \n",(*graph)->node[i]->name,(*graph)->node[i]->d);
         }
     }
 
     return res;
-}
-void delete_all(Graph **graph){
-    for(int i=(*graph)->size_node-1;i>=0;i--){
-        delete_node(graph,(*graph)->node[i]->name);
-    }
 }

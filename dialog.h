@@ -9,7 +9,7 @@
 
 int dialog(const char *msgs[], int n);
 
-int Add_from_file(Graph **);
+void Add_from_file(Graph **);
 
 int D_Delete_ALL(Graph **);
 
@@ -36,6 +36,6 @@ int D_Find_Shortest_Way(Graph **);
 int D_Strong_Connectivity(Graph **);
 
 
-int D_Save_File(Graph **);
+void D_Save_File(Graph **);
 
 #endif //PROGA5_DIALOG_H

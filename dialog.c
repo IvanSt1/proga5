@@ -4,8 +4,8 @@
 #include "get.h"
 #include "item.h"
 
-const char *errmsgs[] = {"OK", "Duplicate Node", "Duplicate Edge", "Memory problem", "There is no such node",
-                         "To is the same as from","There is no such Edge"};
+const char *errmsgs[] = {"OK", "Duplicate Node", "Duplicate Edge", "Memory problem", "There isn't such node",
+                         "To is the same as from","There isn't such Edge","There isn't this way"};
 
 int dialog(const char *msgs[], int n) {
     char *errmsg = "";
@@ -25,8 +25,32 @@ int dialog(const char *msgs[], int n) {
     return rc;
 }
 
-int Add_from_file(Graph **graph) {
-    return 1;
+void Add_from_file(Graph **graph) {
+    printf("Enter file Name\n");
+    char* name=Get_Str();
+    if (name==NULL){
+        return ;
+    }
+    FILE *file = fopen(name, "rb");
+    while (file==NULL){
+        printf("There is no such file, try one more time\n");
+        printf("Enter file Name\n");
+        name=Get_Str();
+        if (name==NULL){
+            return ;
+        }
+        file = fopen(name, "r");
+    }
+    int res=work_with_file(graph,file);
+    if (res!=0){
+        printf("Format of information is wrong in file\n");
+        D_Delete_ALL(graph);
+    }
+    else{
+        printf("Successful reading from file\n");
+    }
+    free(name);
+    fclose(file);
 }
 
 int D_Delete_ALL(Graph **graph) {
@@ -42,9 +66,9 @@ int D_Add_Edge(Graph **graph) {
         return 1;
     }
     int name1, name2, weight;
-    printf("Enter first node\n");
+    printf("Enter node from\n");
     Get_Int(&name1);
-    printf("Enter second node\n");
+    printf("Enter node to\n");
     Get_Int(&name2);
     printf("Enter weight\n");
     Get_Int(&weight);
@@ -87,9 +111,9 @@ int D_Delete_Edge(Graph **graph) {
     }
     else {
         int name1, name2, weight;
-        printf("Enter first node\n");
+        printf("Enter node from\n");
         Get_Int(&name1);
-        printf("Enter second node\n");
+        printf("Enter node to\n");
         Get_Int(&name2);
         int rc = delete_edge(graph, name1, name2);
         printf("%s", errmsgs[rc]);
@@ -108,6 +132,18 @@ int D_Show(Graph **graph) {
 }
 
 int D_Find(Graph **graph) {
+    if((*graph)->node==NULL){
+        printf("Graph is empty");
+    }
+    else {
+        int name1, name2, weight;
+        printf("Enter node from\n");
+        Get_Int(&name1);
+        printf("Enter node to\n");
+        Get_Int(&name2);
+        int rc = width_find(graph, name1, name2);
+        printf("%s", errmsgs[rc]);
+    }
     return 1;
 }
 
@@ -118,7 +154,17 @@ int D_Find_Shortest_Way(Graph **graph) {
 int D_Strong_Connectivity(Graph **graph) {
     return 1;
 }
-
-int D_Save_File(Graph **graph) {
-    return 1;
+ void D_Save_File(Graph **graph) {
+    printf("Enter file Name\n");
+    char* name=Get_Str();
+    if (name==NULL){
+        return ;
+    }
+    FILE *file = fopen(name, "wb");
+    if (file==NULL){
+        printf("Problem with open file");
+    }
+    save_to_file(graph,file);
+    free(name);
+    fclose(file);
 }
