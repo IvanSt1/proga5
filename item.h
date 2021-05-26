@@ -17,8 +17,11 @@ typedef struct Node {
     int x;
     int y;
     Ed* edges;
+    Ed* in_edges;
     int color;
     int d;
+    struct Node * prev;
+    int n_strong;
 } Node;
 typedef struct Graph {
     int size_node;
@@ -42,4 +45,9 @@ void delete_all(Graph **Graph);
 int work_with_file(Graph **graph, FILE *file);
 void save_to_file(Graph** graph, FILE* file);
 int width_find(Graph**, int,int);
+int find_shortest_way(Graph **graph, int name1, int name2);
+void create_random(Graph **graph,int n_n, int n_e);
+int find_strong_connectivity(Graph **);
+void graphviz(Graph *graph,FILE* file);
+void vyvod(Node *x);
 #endif //PROGA5_ITEM_H

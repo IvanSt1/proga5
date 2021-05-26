@@ -37,5 +37,7 @@ int D_Strong_Connectivity(Graph **);
 
 
 void D_Save_File(Graph **);
-
+int D_Random_Graph(Graph** graph);
+int D_Timing(Graph**);
+int D_Graphviz(Graph**);
 #endif //PROGA5_DIALOG_H
